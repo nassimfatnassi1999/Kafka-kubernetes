@@ -1,0 +1,79 @@
+apiVersion: monitoring.coreos.com/v1
+kind: PodMonitor
+metadata:
+  name: kafka-resources-metrics # PodMonitor pour Kafka et ZooKeeper
+  labels:
+    app: strimzi
+    release: prom-stack # Ajoutez ce label si podMonitorSelectorNilUsesHelmValues=true (voir section C)
+spec:
+  selector:
+    matchExpressions:
+      - key: "strimzi.io/kind"
+        operator: In
+        values: ["Kafka", "ZooKeeper"] # Cible les pods Kafka et ZooKeeper
+  namespaceSelector:
+    matchNames:
+      - kafka # <-- MODIFIEZ ICI: Mettez le namespace de votre cluster Kafka 'my-cluster'
+  podMetricsEndpoints:
+  - path: /metrics
+    port: 9092
+    interval: 30s # Optionnel
+---
+apiVersion: monitoring.coreos.com/v1
+kind: PodMonitor
+metadata:
+  name: kafka-exporter-metrics # PodMonitor pour Kafka Exporter
+  labels:
+    app: strimzi
+    release: prom-stack # Ajoutez ce label si podMonitorSelectorNilUsesHelmValues=true
+spec:
+  selector:
+    matchLabels:
+      strimzi.io/kind: KafkaExporter # Cible les pods Kafka Exporter
+      strimzi.io/cluster: my-cluster # Cible spécifiquement votre cluster
+  namespaceSelector:
+    matchNames:
+      - kafka # Mettez le namespace de votre cluster Kafka 'my-cluster'
+  podMetricsEndpoints:
+  - path: /metrics
+    port: 9404 # Nom du port sur le pod Kafka Exporter (souvent 9404 ou tcp-prometheus)
+    interval: 15s # Optionnel
+---
+apiVersion: monitoring.coreos.com/v1
+kind: PodMonitor
+metadata:
+  name: entity-operator-metrics # PodMonitor pour Entity Operator (Topic/User)
+  labels:
+    app: strimzi
+    release: prom-stack # Ajoutez ce label si podMonitorSelectorNilUsesHelmValues=true
+spec:
+  selector:
+    matchLabels:
+      strimzi.io/kind: EntityOperator # Cible les pods Entity Operator
+      strimzi.io/cluster: my-cluster # Cible spécifiquement votre cluster
+  namespaceSelector:
+    matchNames:
+      - kafka # Mettez le namespace de votre cluster Kafka 'my-cluster'
+  podMetricsEndpoints:
+  - path: /metrics
+    port: entity-metrics #  Nom du port sur le pod Entity Operator
+    interval: 30s # Optionnel
+---
+apiVersion: monitoring.coreos.com/v1
+kind: PodMonitor
+metadata:
+  name: cluster-operator-metrics # PodMonitor pour Cluster Operator
+  labels:
+    app: strimzi
+    release: prom-stack # Ajoutez ce label si podMonitorSelectorNilUsesHelmValues=true
+spec:
+  selector:
+    matchLabels:
+      strimzi.io/kind: cluster-operator # Cible le pod Cluster Operator
+  namespaceSelector:
+    matchNames:
+      - kafka # Mettez le namespace où Strimzi Operator est déployé
+  podMetricsEndpoints:
+  - path: /metrics
+    port: http #  Nom du port sur le pod Cluster Operator
+    interval: 30s # Optionnel
