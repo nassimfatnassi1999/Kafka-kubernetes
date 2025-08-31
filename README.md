@@ -7,6 +7,7 @@ Ce projet permet de déployer une infrastructure **Kafka sur Kubernetes** avec l
 - 📁 **Centralisation des logs** des pods (Kafka, Zookeeper, etc.) avec la stack **EFK** (Elasticsearch, Fluentd, Kibana)
 
 ---
+![Architecture Kafka Strimzi + EFK + Monitoring](./annexe-sans-gitops.png)
 
 ## 📂 Arborescence
 
